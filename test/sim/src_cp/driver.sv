@@ -13,11 +13,11 @@ class driver;
   task reset;
     wait (i_spi.rst);
     `DRIV_ITF.i_data_p <= 8'b0;
-    `DRIV_ITF.i_data_s <= 8'b0;
+    `DRIV_ITF.io_miso_s <= 8'b0;
     `DRIV_ITF.trans_en <= 1'b0;
 
     //case master   
-    `DRIV_ITF.i_data_s <= 1'b0;
+    `DRIV_ITF.io_miso_s <= 1'b0;
 
   endtask
 
@@ -35,7 +35,7 @@ class driver;
     for (int i = 0; i < 8; i++) begin
       //  @(posedge i_spi.SCK)
       //	  trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
-      @(negedge i_spi.SCK) `DRIV_ITF.i_data_s <= trans.i_data_s[7-i];
+      @(negedge i_spi.SCK) `DRIV_ITF.io_miso_s <= trans.io_miso_s[7-i];
     end
     trans.interupt_request = `DRIV_ITF.interupt_request;
     repeat (10) @(posedge i_spi.DRIVER.clk);

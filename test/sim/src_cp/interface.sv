@@ -8,8 +8,8 @@ interface itf_spi_env (
   logic [7:0] o_data_p;
   logic interupt_request;
   wire SCK;
-  wire i_data_s;
-  wire o_data_s;
+  wire io_miso_s;
+  wire io_mosi_s;
   wire SS;
 
   clocking driver_cb @(posedge clk);
@@ -20,8 +20,8 @@ interface itf_spi_env (
     output data_config;
     output trans_en;
     inout SCK;
-    inout i_data_s;
-    inout o_data_s;
+    inout io_miso_s;
+    inout io_mosi_s;
     inout SS;
   endclocking
   modport DRIVER(clocking driver_cb, input clk, rst);

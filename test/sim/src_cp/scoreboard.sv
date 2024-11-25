@@ -13,7 +13,7 @@ class scoreboard;
       $display("before get from scb");
       mon2scb.get(trans);
       //gen2score.get(bf_trans);
-      if ((trans.i_data_p != trans.o_data_s) || (trans.i_data_s != trans.o_data_p)) begin
+      if ((trans.i_data_p != trans.io_mosi_s) || (trans.io_miso_s != trans.o_data_p)) begin
         trans.display("FAILED");
       end else begin
 
