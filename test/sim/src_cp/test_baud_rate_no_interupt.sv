@@ -1,5 +1,5 @@
 
-`include "/home/DN02/SPI/test/sim/src_cp/enviroment.sv"
+`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/enviroment.sv"
 
 program test (
     itf_spi_env i_spi

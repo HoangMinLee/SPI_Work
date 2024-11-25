@@ -1,4 +1,4 @@
-`include "/home/DN02/SPI/test/sim/src_cp/transaction.sv"
+`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/transaction.sv"
 class scoreboard;
   mailbox mon2scb;
   int no_transaction;
