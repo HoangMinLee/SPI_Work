@@ -17,10 +17,7 @@ class driver;
     `DRIV_ITF.trans_en <= 1'b0;
 
     //case master   
-    //`DRIV_ITF.i_data_s <= 1'b0;
-    //case slave
-    `DRIV_ITF.o_data_s <= 1'b0;
-    wait (!i_spi.rst);
+    `DRIV_ITF.i_data_s <= 1'b0;
 
   endtask
 
@@ -31,26 +28,19 @@ class driver;
     //output
     @(posedge i_spi.DRIVER.clk);
     `DRIV_ITF.data_config <= trans.data_config;
-    if (trans.data_config[28] == 1) begin
-      //repeat (10) @(i_spi.DRIVER.clk);
-      `DRIV_ITF.i_data_p <= trans.i_data_p;
-      `DRIV_ITF.trans_en <= 1'b1;
-      //@(negedge i_spi.SS)   
-      for (int i = 0; i < 8; i++) begin
-        //@(posedge i_spi.SCK)
-        //trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
-        @(negedge i_spi.SCK) `DRIV_ITF.i_data_s <= trans.i_data_s[7-i];
-      end
-      trans.interupt_request = `DRIV_ITF.interupt_request;
-      repeat (10) @(posedge i_spi.DRIVER.clk);
-      `DRIV_ITF.trans_en <= 1'b0;
-      no_transaction++;
-    end else begin
-      `DRIV_ITF.i_data_p <= trans.i_data_p;
-      `DRIV_ITF.trans_en <= 1'b1;
-      
+    repeat (10) @(i_spi.DRIVER.clk);
+    `DRIV_ITF.i_data_p <= trans.i_data_p;
+    `DRIV_ITF.trans_en <= 1'b1;
+    //@(negedge i_spi.SS)
+    for (int i = 0; i < 8; i++) begin
+      //  @(posedge i_spi.SCK)
+      //	  trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
+      @(negedge i_spi.SCK) `DRIV_ITF.i_data_s <= trans.i_data_s[7-i];
     end
-
+    trans.interupt_request = `DRIV_ITF.interupt_request;
+    repeat (10) @(posedge i_spi.DRIVER.clk);
+    `DRIV_ITF.trans_en <= 1'b0;
+    no_transaction++;
 
   endtask
   task main;
