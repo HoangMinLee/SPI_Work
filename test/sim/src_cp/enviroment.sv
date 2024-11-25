@@ -1,8 +1,8 @@
-`include "/home/DN01/SPI_Work/SPI/test/sim/src_cp/transaction.sv"
-`include "/home/DN01/SPI_Work/SPI/test/sim/src_cp/generator.sv"
-`include "/home/DN01/SPI_Work/SPI/test/sim/src_cp/driver.sv"
-`include "/home/DN01/SPI_Work/SPI/test/sim/src_cp/scoreboard.sv"
-`include "/home/DN01/SPI_Work/SPI/test/sim/src_cp/monitor.sv"
+`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/transaction.sv"
+`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/generator.sv"
+`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/driver.sv"
+`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/scoreboard.sv"
+`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/monitor.sv"
 
 class enviroment;
 
