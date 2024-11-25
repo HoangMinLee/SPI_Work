@@ -97,11 +97,12 @@ module spi_module (
   always @(posedge i_sys_clk) begin
     if (STATUS != IDLE) begin
       if((R_SPI_CONTROL_1 != i_data_config[31:24]) || (R_SPI_CONTROL_2 != i_data_config[23:16]) || (R_SPI_BAUD_RATE != i_data_config[7:0])) begin
-        if (R_SPI_CONTROL_1[7] == 0)  //SPIE = 0		//why there is only SPIE, what about SPTIE
+        if (R_SPI_CO    NTROL_1[7] == 0)  //SPIE = 0		//why there is only SPIE, what about SPTIE
           STATUS <= IDLE;
         else begin
-          R_SPI_STATUS[4] = 1'b1;  //MODF = 1
-          R_SPI_CONTROL_1[6] = 1'b0;  //SPE = 0
+                                                  
+                                                  R_SPI_STATUS[4] = 1'b1;  //MODF = 1
+                    R_SPI_CONTROL_1[6] = 1'b0;  //SPE = 0
         end
       end
     end
