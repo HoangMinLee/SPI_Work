@@ -29,12 +29,12 @@ module tb_spi;
       .i_sys_clk(i_spi.clk),
       .i_sys_rst(i_spi.rst),
       .i_data(i_spi.i_data_p),
-      .io_MISO(i_spi.i_data_s),
+      .io_MISO(i_spi.io_miso_s),
       .i_data_config(i_spi.data_config),
       .i_trans_en(i_spi.trans_en),
       .o_interrupt(i_spi.interupt_request),
       .o_data(i_spi.o_data_p),
-      .io_MOSI(i_spi.o_data_s),
+      .io_MOSI(i_spi.io_mosi_s),
       .io_SCK(i_spi.SCK),
       .io_SS(i_spi.SS)
   );
