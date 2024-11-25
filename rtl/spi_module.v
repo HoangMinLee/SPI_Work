@@ -40,7 +40,8 @@ module spi_module (
       //MASTER - ENABLE SYS - INTERUP EN - CHECK INTERUP - CONDITION COUNTER
       if (!M_SS) begin
         if (R_counter_div < cal) begin
-          R_counter_div = R_counter_div + 1'b1;
+          R_counter_div = R_counter_div
+           + 1'b1;
         end else begin
           R_counter_div = 0;
           M_SCK = !M_SCK;
