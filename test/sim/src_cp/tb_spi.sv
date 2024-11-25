@@ -1,7 +1,7 @@
 
-`include "/home/DN01/SPI/rtl/spi_module.v"
-`include "/home/DN01/SPI/test/sim/src_cp/interface.sv"
-`include "/home/DN01/SPI/test/sim/src_cp/test_baud_rate_no_interupt.sv"
+`include "/home/DN02/SPI/rtl/spi_module.v"
+`include "/home/DN02/SPI/test/sim/src_cp/interface.sv"
+`include "/home/DN02/SPI/test/sim/src_cp/test_baud_rate_no_interupt.sv"
 
 module tb_spi;
   bit clk;

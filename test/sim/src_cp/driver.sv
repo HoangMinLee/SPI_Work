@@ -1,4 +1,4 @@
-`include "/home/DN01/SPI/test/sim/src_cp/transaction.sv"
+`include "/home/DN02/SPI/test/sim/src_cp/transaction.sv"
 `define DRIV_ITF i_spi.DRIVER.driver_cb
 class driver;
   int no_transaction;
