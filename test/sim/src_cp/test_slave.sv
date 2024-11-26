@@ -9,26 +9,26 @@ program test (
   class my_trans extends transaction;
 
     //R1
-    bit              SPIE      = 1'b0;  //interupt
-    bit              SPE       = 1'b1;  //system enable
-    bit              CPOL      = 1'b0;  //mode clock-high when off
-    bit              CPHA      = 1'b1;  //mode - just setup 1
-    bit              LSBFE     = 1'b0;  // first MSB or LSB
-    bit              MSTR_M    = 1'b1;  //master
-    bit              MSTR_S    = 1'b0;  //slave
-    bit              SSOE_M    = 1'b1;  //ONLY 1
-    bit              SSOE_S    = 1'b0;  //ONLY 0
+    bit       SPIE      = 1'b0;  //interupt
+    bit       SPE       = 1'b1;  //system enable
+    bit       CPOL      = 1'b0;  //mode clock-high when off
+    bit       CPHA      = 1'b1;  //mode - just setup 1
+    bit       LSBFE     = 1'b0;  // first MSB or LSB
+    bit       MSTR_M    = 1'b1;  //master
+    bit       MSTR_S    = 1'b0;  //slave
+    bit       SSOE_M    = 1'b1;  //ONLY 1
+    bit       SSOE_S    = 1'b0;  //ONLY 0
     //R2
-    bit              SPISWAI   = 1'b0;  //save power
-    bit              SPCO      = 1'b0;  //setup bidirection
-    bit              MODFEN    = 1'b1;  //on - off CS pin
-    bit              MODFEN_S  = 1'b0;
+    bit       SPISWAI   = 1'b0;  //save power
+    bit       SPCO      = 1'b0;  //setup bidirection
+    bit       MODFEN    = 1'b1;  //on - off CS pin
+    bit       MODFEN_S  = 1'b0;
     //Status
-    bit              SPIF      = 1'b1;  //set -> received data from data_reg
-    bit              MODF      = 1'b0;  //erro master
+    bit       SPIF      = 1'b1;  //set -> received data from data_reg
+    bit       MODF      = 1'b0;  //erro master
     //baud rate
-    bit        [2:0] baud_high = 3'd0;
-    bit        [2:0] baud_low  = 3'd1;
+    bit [2:0] baud_high = 3'd0;
+    bit [2:0] baud_low  = 3'd1;
 
 
     function new();

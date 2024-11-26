@@ -59,7 +59,7 @@ class driver;
           `DRIV_ITF.SCK <= trans.data_config[27];
           `DRIV_ITF.SS  <= 0;
         end else if (!trans.data_config[28] && trans.data_config[30] == 1 && trans.data_config[25] == 0) begin
-          if (!`DRIV_ITF.SCK) begin
+          if (!`DRIV_ITF.SS) begin
             if (R_counter_div < cal) begin
               R_counter_div <= R_counter_div + 1'b1;
             end else begin
@@ -78,7 +78,7 @@ class driver;
         @(negedge `DRIV_ITF.SCK) `DRIV_ITF.io_miso_s <= trans.io_miso_s[7-i];
       end
       `DRIV_ITF.SS <= 1;
-      trans.interupt_request = `DRIV_ITF.interupt_request;
+      trans.interupt   _request = `DRIV_ITF.interupt_request;
       repeat (10) @(posedge i_spi.DRIVER.clk);
       `DRIV_ITF.trans_en <= 1'b0;
       no_transaction++;
@@ -89,7 +89,7 @@ class driver;
   task main;
     fork
       begin
-        wait (i_spi.rst);
+        wait (i_spi.rst);uu
       end
       begin
         forever driver();
