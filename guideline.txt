@@ -1,0 +1,17 @@
+Test 1: test_trans.sv
+Test 2: test_baud_rate_no_interrupt.sv
+Test 3: test_baud_rate_interrupt.sv
+Test 4: test_trans_msb_lsb_no_interrupt.sv
+Test 5: test_trans_msb_lsb_interrupt.sv
+
+# Run test (It will open Design Browser 1 - SimVision and Console - Simvision)
+source /home/DN02/SPI_Work/SPI/Script/run_tb.csh
+-> Type from (1,2,3,4,5) equilavent to the test case above to run test 
+
+# Quit Design Browser 1 and Console for run other tests
+# Dont use the Xcelium terminal, create another terminal to run this command 
+source /home/DN02/SPI_Work/SPI/Script/kill.csh
+
+The information about how to add wave and monitor the result, please ask me if you dont know.
+If you have any questions, pleas feel free to contact me.
+
