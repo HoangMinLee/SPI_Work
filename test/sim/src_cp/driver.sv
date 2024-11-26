@@ -33,7 +33,7 @@ class driver;
     //output
     @(posedge i_spi.DRIVER.clk);
     `DRIV_ITF.data_config <= trans.data_config;
-    if (trans.data_config[28] == 0) begin
+    if (trans.data_config[28] == 1) begin
       repeat (10) @(i_spi.DRIVER.clk);
       `DRIV_ITF.i_data_p <= trans.i_data_p;
       `DRIV_ITF.trans_en <= 1'b1;
@@ -48,21 +48,25 @@ class driver;
       `DRIV_ITF.trans_en <= 1'b0;
       no_transaction++;
     end else begin
+      `DRIV_ITF.i_data_p <= trans.i_data_p;
+      `DRIV_ITF.trans_en <= 1'b1;
+      `DRIV_ITF.SS <= 0;
       @(posedge i_spi.DRIVER.clk) begin
         if (i_spi.rst) begin
           R_counter_div <= 12'b0;  // Reset counter when system reset
           cal           <= 12'b0;
           `DRIV_ITF.SCK <= trans.data_config[27];
+          `DRIV_ITF.SS  <= 0;
         end else if (trans.data_config[28] && trans.data_config[30] == 1 && trans.data_config[25] == 0) begin
-          if (!`MDRIV_ITF.SCK) begin
+          if (!`DRIV_ITF.SCK) begin
             if (R_counter_div < cal) begin
               R_counter_div <= R_counter_div + 1'b1;
             end else begin
-              R_counter_div  <= 12'b0;
-              `MDRIV_ITF.SCK <= ~`MDRIV_ITF.SCK;
+              R_counter_div <= 12'b0;
+              `DRIV_ITF.SCK <= ~`DRIV_ITF.SCK;
             end
           end else begin
-            `MDRIV_ITF.SCK <= trans.data_config[27];
+            `DRIV_ITF.SCK <= trans.data_config[27];
           end
         end
       end
@@ -70,9 +74,12 @@ class driver;
       for (int i = 0; i < 8; i++) begin
         //  @(posedge i_spi.SCK)
         //	  trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
-        @(negedge `MDRIV_ITF.SCK) `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];
+        @(negedge `DRIV_ITF.SCK) `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];
       end
-
+      trans.interupt_request = `DRIV_ITF.interupt_request;
+      repeat (10) @(posedge i_spi.DRIVER.clk);
+      `DRIV_ITF.trans_en <= 1'b0;
+      no_transaction++;
     end
 
 
