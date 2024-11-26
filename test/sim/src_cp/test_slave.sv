@@ -27,39 +27,34 @@ program test (
     bit              SPIF      = 1'b1;  //set -> received data from data_reg
     bit              MODF      = 1'b0;  //erro master
     //baud rate
-    bit        [2:0] baud_high = 3'd1;
+    bit        [2:0] baud_high = 3'd0;
     bit        [2:0] baud_low  = 3'd1;
 
 
-    static bit [3:0] count;
     function new();
       super.new();
-      count = 0;
-
     endfunction
 
 
     function void pre_randomize();
 
       data_config = {
-        {SPIE, SPE, 1'b0, MSTR_S, CPOL, CPHA, SSOE_M, LSBFE},
+        {SPIE, SPE, 1'b0, MSTR_M, CPOL, CPHA, SSOE_M, LSBFE},
         {3'b0, MODFEN, 2'b0, SPISWAI, SPCO},
         {1'b1, 2'b0, MODF, 4'b0},
         {1'b0, baud_high, 1'b0, baud_low}
       };
 
-      if (count == 5) begin
-        LSBFE = 1'b1;
-      end
-      count++;
     endfunction
 
   endclass
+
   enviroment env;
   my_trans   my_tr;
   initial begin
     env = new(i_spi);
     env.gen.repeat_count = 10;
+
     my_tr = new();
 
     env.gen.trans = my_tr;

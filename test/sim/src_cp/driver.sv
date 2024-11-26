@@ -57,7 +57,7 @@ class driver;
           cal           <= 12'b0;
           `DRIV_ITF.SCK <= trans.data_config[27];
           `DRIV_ITF.SS  <= 0;
-        end else if (trans.data_config[28] && trans.data_config[30] == 1 && trans.data_config[25] == 0) begin
+        end else if (!trans.data_config[28] && trans.data_config[30] == 1 && trans.data_config[25] == 0) begin
           if (!`DRIV_ITF.SCK) begin
             if (R_counter_div < cal) begin
               R_counter_div <= R_counter_div + 1'b1;
@@ -74,8 +74,9 @@ class driver;
       for (int i = 0; i < 8; i++) begin
         //  @(posedge i_spi.SCK)
         //	  trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
-        @(negedge `DRIV_ITF.SCK) `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];
+        @(negedge `DRIV_ITF.SCK) `DRIV_ITF.io_miso_s <= trans.io_miso_s[7-i];
       end
+      `DRIV_ITF.SS <= 1;
       trans.interupt_request = `DRIV_ITF.interupt_request;
       repeat (10) @(posedge i_spi.DRIVER.clk);
       `DRIV_ITF.trans_en <= 1'b0;
