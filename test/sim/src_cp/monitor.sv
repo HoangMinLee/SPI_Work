@@ -6,8 +6,9 @@ class monitor;
   function new(virtual itf_spi_env i_spi, mailbox mon2scb);
     this.i_spi   = i_spi;
     this.mon2scb = mon2scb;
-  endfunction
 
+
+  endfunction
   task main;
     forever begin
       transaction trans;
@@ -32,5 +33,5 @@ class monitor;
 
   endtask
 
-endclass
 
+endclass

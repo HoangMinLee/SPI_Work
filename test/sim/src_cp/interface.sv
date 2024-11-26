@@ -26,4 +26,5 @@ interface itf_spi_env (
   endclocking
   modport DRIVER(clocking driver_cb, input clk, rst);
 
+
 endinterface

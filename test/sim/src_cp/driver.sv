@@ -16,8 +16,14 @@ class driver;
     `DRIV_ITF.i_data_s <= 8'b0;
     `DRIV_ITF.trans_en <= 1'b0;
 
-    //case master   
+    //case master
     `DRIV_ITF.i_data_s <= 1'b0;
+
+    wait (!i_spi.rst);
+
+
+
+
 
   endtask
 

@@ -1,7 +1,8 @@
-
 `include "/home/DN02/SPI_Work/SPI/rtl/spi_module.v"
 `include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/interface.sv"
-`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/test_baud_rate_no_interupt.sv"
+`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/test_trans.sv"
+
+
 
 module tb_spi;
   bit clk;
@@ -26,23 +27,19 @@ module tb_spi;
 
 
   spi_module uut (
-      .i_sys_clk(i_spi.clk),
-      .i_sys_rst(i_spi.rst),
+      .clk(i_spi.clk),
+      .rst_n(i_spi.rst),
       .i_data(i_spi.i_data_p),
-      .io_MISO(i_spi.i_data_s),
-      .i_data_config(i_spi.data_config),
-      .i_trans_en(i_spi.trans_en),
-      .o_interrupt(i_spi.interupt_request),
+      .MISO(i_spi.i_data_s),
+      .data_config(i_spi.data_config),
+      .trans_en(i_spi.trans_en),
+      .interupt_request(i_spi.interupt_request),
       .o_data(i_spi.o_data_p),
-      .io_MOSI(i_spi.o_data_s),
-      .io_SCK(i_spi.SCK),
-      .io_SS(i_spi.SS)
+      .MOSI(i_spi.o_data_s),
+      .SCK(i_spi.SCK),
+      .SS(i_spi.SS)
   );
 
-  initial begin
-    $dumpfile("waveform.vcd");
-    $dumpvars(0, tb_spi);
-  end
+
 
 endmodule
-
