@@ -1,4 +1,4 @@
-`include "/home/DN02/SPI_Work/SPI/test/sim/src_cp/transaction.sv"
+`include "/home/DN03/SPI_Work/SPI/test/sim/src_cp/transaction.sv"
 class monitor;
   virtual itf_spi_env i_spi;
 
