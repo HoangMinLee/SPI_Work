@@ -48,6 +48,7 @@ class driver;
       `DRIV_ITF.trans_en <= 1'b0;
       no_transaction++;
     end else begin
+      repeat (10) @(i_spi.DRIVER.clk);
       `DRIV_ITF.i_data_p <= trans.i_data_p;
       `DRIV_ITF.trans_en <= 1'b1;
       `DRIV_ITF.SS <= 0;
