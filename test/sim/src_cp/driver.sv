@@ -21,8 +21,8 @@ class driver;
     `DRIV_ITF.io_miso_s <= 8'b0;
     `DRIV_ITF.trans_en  <= 1'b0;
 
-    //case master   
-    `DRIV_ITF.io_miso_s <= 1'b0;
+    //case slave
+    `DRIV_ITF.io_mosi_s <= 1'b0;
 
   endtask
 
@@ -30,7 +30,7 @@ class driver;
 
     transaction trans;
     gen2driv.get(trans);
-    //output
+    //intput
     @(posedge i_spi.DRIVER.clk);
     `DRIV_ITF.data_config <= trans.data_config;
     if (trans.data_config[28] == 1) begin
@@ -50,37 +50,41 @@ class driver;
     end else begin
       repeat (10) @(i_spi.DRIVER.clk);
       `DRIV_ITF.i_data_p <= trans.i_data_p;
-      `DRIV_ITF.trans_en <= 1'b1;
       `DRIV_ITF.SS <= 0;
-      @(posedge i_spi.DRIVER.clk) begin
-        if (i_spi.rst) begin
-          R_counter_div <= 12'b0;  // Reset counter when system reset
-          cal           <= 12'b0;
-          `DRIV_ITF.SCK <= trans.data_config[27];
-          `DRIV_ITF.SS  <= 0;
-        end else if (!trans.data_config[28] && trans.data_config[30] == 1 && trans.data_config[25] == 0) begin
+      //@(posedge i_spi.DRIVER.clk) begin
+        cal = 12'd1;
+        `DRIV_ITF.SCK <= trans.data_config[27];
+        // if (!i_spi.rst) begin
+        //   R_counter_div <= 12'b0;  // Reset counter when system reset
+        //   cal           <= 12'b0;
+        //   `DRIV_ITF.SCK <= trans.data_config[27];
+
+        // end else 
+       /* if (!trans.data_config[28] && trans.data_config[30] == 1 && trans.data_config[25] == 0) 
+        begin
           if (!`DRIV_ITF.SS) begin
             if (R_counter_div < cal) begin
               R_counter_div <= R_counter_div + 1'b1;
             end else begin
               R_counter_div <= 12'b0;
-              `DRIV_ITF.SCK <= ~`DRIV_ITF.SCK;
+              SCK_reg = ~SCK_reg;
             end
           end else begin
             `DRIV_ITF.SCK <= trans.data_config[27];
           end
         end
-      end
+      end*/
+      forever
 
+      
       for (int i = 0; i < 8; i++) begin
         //  @(posedge i_spi.SCK)
         //	  trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
-        @(negedge `DRIV_ITF.SCK) `DRIV_ITF.io_miso_s <= trans.io_miso_s[7-i];
+        @(negedge i_spi.SCK) `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];
       end
-      `DRIV_ITF.SS <= 1;
-      trans.interupt   _request = `DRIV_ITF.interupt_request;
+      trans.interupt_request = `DRIV_ITF.interupt_request;
       repeat (10) @(posedge i_spi.DRIVER.clk);
-      `DRIV_ITF.trans_en <= 1'b0;
+      `DRIV_ITF.SS <= 1'b1;
       no_transaction++;
     end
 
@@ -89,7 +93,7 @@ class driver;
   task main;
     fork
       begin
-        wait (i_spi.rst);uu
+        wait (i_spi.rst);
       end
       begin
         forever driver();

@@ -11,7 +11,7 @@ program test (
     //R1
     bit       SPIE      = 1'b0;  //interupt
     bit       SPE       = 1'b1;  //system enable
-    bit       CPOL      = 1'b0;  //mode clock-high when off
+    bit       CPOL      = 1'b0;  //Active-low clocks selected. In idle state SCK is high
     bit       CPHA      = 1'b1;  //mode - just setup 1
     bit       LSBFE     = 1'b0;  // first MSB or LSB
     bit       MSTR_M    = 1'b1;  //master
@@ -39,7 +39,7 @@ program test (
     function void pre_randomize();
 
       data_config = {
-        {SPIE, SPE, 1'b0, MSTR_M, CPOL, CPHA, SSOE_M, LSBFE},
+        {SPIE, SPE, 1'b0, MSTR_S, CPOL, CPHA, SSOE_S, LSBFE},
         {3'b0, MODFEN, 2'b0, SPISWAI, SPCO},
         {1'b1, 2'b0, MODF, 4'b0},
         {1'b0, baud_high, 1'b0, baud_low}
@@ -54,9 +54,7 @@ program test (
   initial begin
     env = new(i_spi);
     env.gen.repeat_count = 10;
-
     my_tr = new();
-
     env.gen.trans = my_tr;
     env.run();
   end
