@@ -54,48 +54,47 @@ class driver;
       no_transaction++;
     end else begin
       // SPI Slave mode transaction with SCK generation
-      repeat (10) @(posedge i_spi.DRIVER.clk);
-      `DRIV_ITF.i_data_p <= trans.i_data_p;
-      `DRIV_ITF.SS <= 1'b0;  // Activate slave select
-      `DRIV_ITF.SCK <= 0;
-      cal = 12'd5;
-      // Clock generation loop (when SS is low)
-      fork
-        // Clock generation task
-        begin
-          forever begin
-            @(posedge i_spi.DRIVER.clk);  // Synchronize with the driver's clock
-            if (clock_counter < cal) begin
-              clock_counter <= clock_counter + 1'b1;
-            end else begin
-              clock_counter <= 12'b0;
-              SCK_reg <= ~SCK_reg;  // Toggle the clock
-              `DRIV_ITF.SCK <= SCK_reg;  // Output the toggled clock signal
-            end
+    repeat (10) @(posedge i_spi.DRIVER.clk);
+    `DRIV_ITF.i_data_p <= trans.i_data_p;
+    `DRIV_ITF.SS <= 1'b0;  // Activate slave select
+    `DRIV_ITF.SCK <= 1'b0;
 
-            // Check if SS (Slave Select) is deactivated, stop clock generation
-            if (`DRIV_ITF.SS) begin
-              // Stop clock generation when SS is high
-              disable fork;
-            end
-          end
-        end
-        begin
-          wait (`DRIV_ITF.SS == 0);  // Wait for SS to go low (start SPI operation)
-          clock_counter <= 12'b0;  // Reset the clock counter when SS is low
-        end
-      join_any  // Wait for either of the forked tasks to complete
+    // Initialize clock cycle generation
+    clock_counter <= 12'b0;
 
-      // SPI slave interaction (MOSI)
-      for (int i = 0; i < 8; i++) begin
-        @(negedge `DRIV_ITF.SCK);  // Sync with the clock
-        `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];
+    // Always block for SCK generation
+    always @(posedge i_spi.DRIVER.clk) begin
+      if (!`DRIV_ITF.SS) begin  // Only run when SS is low
+        if (clock_counter < cal) begin
+          clock_counter <= clock_counter + 1'b1;
+        end else begin
+          clock_counter <= 12'b0;
+          SCK_reg <= ~SCK_reg;  // Toggle SCK
+          `DRIV_ITF.SCK <= SCK_reg;
+        end
+      end else begin
+        // When SS goes high, stop clock toggling and set SCK low
+        `DRIV_ITF.SCK <= 1'b0;
       end
+    end
+
+    // Always block for MOSI transmission
+    always @(negedge `DRIV_ITF.SCK) begin
+      for (int i = 0; i < 8; i++) begin
+        #1;  // Small delay to stabilize signals
+        `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];  // Transfer MOSI data
+      end
+
+      // After completing data transfer, set SS to high
+      @(posedge i_spi.DRIVER.clk);
+      `DRIV_ITF.SS <= 1'b1;  // Deactivate slave select
       trans.interupt_request = `DRIV_ITF.interupt_request;
       repeat (10) @(posedge i_spi.DRIVER.clk);
-      `DRIV_ITF.SS <= 1'b1;
       no_transaction++;
     end
+
+    end
+    
   endtask
 
   // Main task to run the driver continuously
