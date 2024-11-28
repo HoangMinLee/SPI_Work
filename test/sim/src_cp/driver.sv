@@ -12,9 +12,9 @@ class driver;
   // reset
   task reset;
     wait (i_spi.rst);
-    `DRIV_ITF.i_data_p <= 8'b0;
+    `DRIV_ITF.i_data_p  <= 8'b0;
     `DRIV_ITF.io_miso_s <= 8'b0;
-    `DRIV_ITF.trans_en <= 1'b0;
+    `DRIV_ITF.trans_en  <= 1'b0;
 
     //case master
     `DRIV_ITF.io_miso_s <= 1'b0;
