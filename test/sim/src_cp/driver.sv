@@ -5,16 +5,16 @@ class driver;
   int no_transaction;
   virtual itf_spi_env i_spi;
   mailbox gen2driv;
-  reg [11:0] clock_counter;  // Counter for clock generation
-  reg [11:0] cal;  // Clock cycle value for controlling the clock frequency
-  reg SCK_reg;  // Register to store the current SCK value
+  reg SCK_reg;
+  reg [11:0] clock_counter;
+  reg [11:0] cal;  // Clock division factor for controlling frequenc
 
   function new(virtual itf_spi_env i_spi, mailbox gen2driv);
     this.i_spi = i_spi;
     this.gen2driv = gen2driv;
-    clock_counter = 12'b0;  // Initialize the clock counter
-    cal = 12'd1;  // Set the clock cycle (can be adjusted)
-    SCK_reg = 0;  // Initialize the SCK signal
+    clock_counter = 12'b0;
+    cal = 12'b0;
+    SCK_reg = 0;
   endfunction
 
   // Reset task
@@ -25,7 +25,6 @@ class driver;
     `DRIV_ITF.trans_en  <= 1'b0;
     `DRIV_ITF.io_mosi_s <= 1'b0;
     `DRIV_ITF.SS        <= 1'b1;  // Deactivate slave select
-    wait (!i_spi.rst);
   endtask
 
   // Main driver task
@@ -33,7 +32,6 @@ class driver;
     transaction trans;
     gen2driv.get(trans);
 
-    // Output setup
     @(posedge i_spi.DRIVER.clk);
     `DRIV_ITF.data_config <= trans.data_config;
 
@@ -54,58 +52,53 @@ class driver;
       no_transaction++;
     end else begin
       // SPI Slave mode transaction with SCK generation
-    repeat (10) @(posedge i_spi.DRIVER.clk);
-    `DRIV_ITF.i_data_p <= trans.i_data_p;
-    `DRIV_ITF.SS <= 1'b0;  // Activate slave select
-    `DRIV_ITF.SCK <= 1'b0;
+      repeat (10) @(posedge i_spi.DRIVER.clk);
+      `DRIV_ITF.i_data_p <= trans.i_data_p;
+      `DRIV_ITF.SS <= 1'b0;  // Activate slave select
+      `DRIV_ITF.SCK <= 0;  // Initial state of SCK
 
-    // Initialize clock cycle generation
-    clock_counter <= 12'b0;
+      // SCK Generation (generate SCK based on clock counter)
+      clock_counter <= 12'b0;
 
-    // Always block for SCK generation
-    always @(posedge i_spi.DRIVER.clk) begin
-      if (!`DRIV_ITF.SS) begin  // Only run when SS is low
+      // Generate SCK until SS is high
+      while (!`DRIV_ITF.SS) begin
+        @(posedge i_spi.DRIVER.clk);  // Synchronize with the driver's clock
         if (clock_counter < cal) begin
           clock_counter <= clock_counter + 1'b1;
         end else begin
           clock_counter <= 12'b0;
           SCK_reg <= ~SCK_reg;  // Toggle SCK
-          `DRIV_ITF.SCK <= SCK_reg;
+          `DRIV_ITF.SCK <= SCK_reg;  // Output SCK signal
         end
-      end else begin
-        // When SS goes high, stop clock toggling and set SCK low
-        `DRIV_ITF.SCK <= 1'b0;
       end
-    end
+      // Keep SCK low when SS is high
+      `DRIV_ITF.SCK <= 1'b0;
 
-    // Always block for MOSI transmission
-    always @(negedge `DRIV_ITF.SCK) begin
+      // Transmit data on MOSI synchronized with SCK
       for (int i = 0; i < 8; i++) begin
-        #1;  // Small delay to stabilize signals
-        `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];  // Transfer MOSI data
+        @(posedge `DRIV_ITF.SCK);  // Synchronize with the rising edge of SCK
+        #1;  // Small delay for signal stability
+        `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];  // Transmit data on MOSI
       end
 
-      // After completing data transfer, set SS to high
+      // Pull SS high after transmitting 8 bits
       @(posedge i_spi.DRIVER.clk);
-      `DRIV_ITF.SS <= 1'b1;  // Deactivate slave select
+      `DRIV_ITF.SS <= 1'b1;  // End the SPI transaction
       trans.interupt_request = `DRIV_ITF.interupt_request;
       repeat (10) @(posedge i_spi.DRIVER.clk);
       no_transaction++;
     end
-
-    end
-    
   endtask
 
-  // Main task to run the driver continuously
+  // Main task
   task main;
     fork
       begin
         wait (i_spi.rst);
-        reset();  // Reset the driver on reset signal
+        reset();
       end
       begin
-        forever driver();  // Continuously run the driver task
+        forever driver();
       end
     join_any
   endtask
