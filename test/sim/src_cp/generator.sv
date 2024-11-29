@@ -1,4 +1,4 @@
-`include "/home/DN03/SPI_Work/SPI/test/sim/src_cp/transaction.sv"
+`include "/home/DN01/SPI_Work/SPI/test/sim/src_cp/transaction.sv"
 class generator;
   rand transaction trans, tr;
   int repeat_count;
