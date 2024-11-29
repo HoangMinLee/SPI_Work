@@ -26,25 +26,25 @@ module spi_module (
   reg [3:0] counter_i;
   //DIV FREQUENCE CLOCK WITH 
   reg [11:0] R_counter_div;
-  reg [11:0] cal;
   reg M_SCK;
   reg M_SS;
+  reg [11:0] cal;
+	 
   always @(posedge i_sys_clk) begin
-    cal = (R_SPI_BAUD_RATE[6:4] + 1) * (2 ** R_SPI_BAUD_RATE[2:0]) - 1;
+	cal <= (R_SPI_BAUD_RATE[6:4] + 1) * (2 ** R_SPI_BAUD_RATE[2:0]) - 1;
     if (!i_sys_rst) begin
       R_counter_div <= 12'b0;
       cal <= 12'b0;
-      M_SCK = R_SPI_CONTROL_1[3];
+      M_SCK <= R_SPI_CONTROL_1[3];
     end
 		else if((R_SPI_CONTROL_1[4])&&(R_SPI_CONTROL_1[6]==1)&&(R_SPI_CONTROL_2[1]==0)) begin
       //MASTER - ENABLE SYS - INTERUP EN - CHECK INTERUP - CONDITION COUNTER
       if (!M_SS) begin
-        if (R_counter_div < cal) begin
-          R_counter_div = R_counter_div + 1'b1;
-        end else begin
-          R_counter_div = 0;
-          M_SCK = !M_SCK;
-        end
+	R_counter_div <= R_counter_div + 1'b1;
+        if (R_counter_div == cal) begin
+          R_counter_div <= 0;
+	M_SCK <= !M_SCK;
+        end      
       end else M_SCK = R_SPI_CONTROL_1[3];
     end
   end
@@ -73,18 +73,17 @@ module spi_module (
       STATUS <= IDLE;
       o_data <= 8'b0;
     end else if (STATUS == IDLE) begin  // should be <= instead of =
-      R_SPI_CONTROL_1 = i_data_config[31:24];
-      R_SPI_CONTROL_2 = i_data_config[23:16];
-      R_SPI_STATUS = i_data_config[15:8];
-      R_SPI_BAUD_RATE = i_data_config[7:0];
-      if (R_SPI_CONTROL_1[4]) begin
-        STATUS = MASTER;
-      end
-      if (!R_SPI_CONTROL_1[4]) begin
-        STATUS = SLAVE;
-      end
+      R_SPI_CONTROL_1 <= i_data_config[31:24];
+      R_SPI_CONTROL_2 <= i_data_config[23:16];
+      R_SPI_STATUS <= i_data_config[15:8];
+      R_SPI_BAUD_RATE <= i_data_config[7:0];
     end
-
+	 if (R_SPI_CONTROL_1[4]) begin
+        STATUS <= MASTER;
+      end
+      else if (!R_SPI_CONTROL_1[4]) begin
+        STATUS <= SLAVE;
+      end
 
   end
   //reg [31:0]reg_data_config;
@@ -99,9 +98,9 @@ module spi_module (
       if((R_SPI_CONTROL_1 != i_data_config[31:24]) || (R_SPI_CONTROL_2 != i_data_config[23:16]) || (R_SPI_BAUD_RATE != i_data_config[7:0])) begin
         if (R_SPI_CONTROL_1[7] == 0)  //SPIE = 0		//why there is only SPIE, what about SPTIE
           STATUS <= IDLE;
-        else begin
-          R_SPI_STATUS[4] = 1'b1;  //MODF = 1
-          R_SPI_CONTROL_1[6] = 1'b0;  //SPE = 0
+        else begin                                    
+              R_SPI_STATUS[4] <= 1'b1;  //MODF = 1
+              R_SPI_CONTROL_1[6] <= 1'b0;  //SPE = 0
         end
       end
     end
@@ -123,11 +122,11 @@ module spi_module (
   end
   always @(posedge i_trans_en) begin
     if (STATUS == MASTER) begin
-      counter_i = 4'b0;
+      
       //       R_SPI_DATA = i_data;
       //       R_SPI_DATA_SHIFT = R_SPI_DATA;					//!!!!
       //        R_SPI_STATUS[7] = 1'b0;
-      M_SS = 1'b0;
+      M_SS <= 1'b0;
     end
   end
 
@@ -149,24 +148,24 @@ module spi_module (
   //MASTER TRANS
   always @(negedge io_SS) begin
     if (STATUS == MASTER) begin
-      R_SPI_DATA       = i_data;
-      R_SPI_DATA_SHIFT = R_SPI_DATA;  //!!!
-      R_SPI_STATUS[7]  = 1'b0;
+	counter_i <= 4'b0;
+      R_SPI_DATA_SHIFT <= i_data;  //!!!
+      R_SPI_STATUS[7]  <= 1'b0;
     end
   end
   always @(posedge io_SS) begin
     if (STATUS == MASTER) begin
-      o_data = R_SPI_DATA_SHIFT;
-      R_SPI_STATUS[7] = 1'b1;
+      o_data <= R_SPI_DATA_SHIFT;
+      R_SPI_STATUS[7] <= 1'b1;
     end
   end
   always @(posedge M_SCK) begin
     if ((!R_SPI_CONTROL_2[0]) && (STATUS == MASTER) && (R_SPI_CONTROL_1[6])) begin  //checl SPC0
       if ((R_SPI_CONTROL_1[2])) begin  // CPHA
         if (R_SPI_CONTROL_1[0] == 1'b1) begin  //LSBFEN = 1
-          M_MOSI = R_SPI_DATA_SHIFT[7];
+          M_MOSI <= R_SPI_DATA_SHIFT[7];
         end else begin
-          M_MOSI = R_SPI_DATA_SHIFT[0];
+          M_MOSI <= R_SPI_DATA_SHIFT[0];
         end
       end
     end
@@ -175,13 +174,15 @@ module spi_module (
     if ((!R_SPI_CONTROL_2[0]) && (STATUS == MASTER) && (R_SPI_CONTROL_1[6])) begin  //checl SPC0
       if ((R_SPI_CONTROL_1[2]) && (!R_SPI_STATUS[7])) begin  // CPHA
         if (R_SPI_CONTROL_1[0] == 1'b1) begin
-          R_SPI_DATA_SHIFT = {R_SPI_DATA_SHIFT[6:0], io_MISO};
-          counter_i = counter_i + 1;
+          R_SPI_DATA_SHIFT <= {R_SPI_DATA_SHIFT[6:0], io_MISO};
         end else begin
-          R_SPI_DATA_SHIFT = {io_MISO, R_SPI_DATA_SHIFT[7:1]};
-          counter_i = counter_i + 1;
+          R_SPI_DATA_SHIFT <= {io_MISO, R_SPI_DATA_SHIFT[7:1]};
         end
-        if (counter_i == 8) M_SS = 1'b1;
+	counter_i <= counter_i + 1;
+        if (counter_i == 7) begin
+	M_SS <= 1'b1;
+	counter_i <= 0;
+	end
       end
     end
   end
@@ -198,15 +199,14 @@ module spi_module (
   reg S_MISO;
   always @(negedge io_SS) begin
     if (STATUS == SLAVE) begin
-      R_SPI_DATA = i_data;
-      R_SPI_DATA_SHIFT = R_SPI_DATA;  //!!!
-      R_SPI_STATUS[7] = 1'b0;
+      R_SPI_DATA_SHIFT <= i_data;  //!!!
+      R_SPI_STATUS[7] <= 1'b0;
     end
   end
   always @(posedge io_SS) begin
     if (STATUS == SLAVE) begin
-      o_data = R_SPI_DATA_SHIFT;
-      R_SPI_STATUS[7] = 1'b1;
+      o_data <= R_SPI_DATA_SHIFT;
+      R_SPI_STATUS[7] <= 1'b1;
     end
   end
 
@@ -222,15 +222,15 @@ module spi_module (
     if ((!R_SPI_CONTROL_2[0]) && (STATUS == SLAVE) && (R_SPI_CONTROL_1[6])) begin  //check SPC0
       if ((R_SPI_CONTROL_1[2]) && (!R_SPI_STATUS[7]) && (!io_SS)) begin  // CPHA
         if (R_SPI_CONTROL_1[0] == 1'b1) S_MISO = R_SPI_DATA_SHIFT[7];
-        else S_MISO = R_SPI_DATA_SHIFT[0];
+        else S_MISO <= R_SPI_DATA_SHIFT[0];
       end
     end
   end
   always @(negedge io_SCK) begin
     if ((!R_SPI_CONTROL_2[0]) && (STATUS == SLAVE) && (R_SPI_CONTROL_1[6])) begin  //checl SPC0
       if ((R_SPI_CONTROL_1[2]) && (!R_SPI_STATUS[7]) && (!io_SS)) begin  // CPHA
-        if (R_SPI_CONTROL_1[0] == 1'b1) R_SPI_DATA_SHIFT = {R_SPI_DATA_SHIFT[6:0], io_MOSI};
-        else R_SPI_DATA_SHIFT = {io_MOSI, R_SPI_DATA_SHIFT[7:1]};
+        if (R_SPI_CONTROL_1[0] == 1'b1) R_SPI_DATA_SHIFT <= {R_SPI_DATA_SHIFT[6:0], io_MOSI};
+        else R_SPI_DATA_SHIFT <= {io_MOSI, R_SPI_DATA_SHIFT[7:1]};
       end
     end
   end
