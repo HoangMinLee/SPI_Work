@@ -17,13 +17,15 @@ class driver;
     wait (i_spi.rst);
     `DRIV_ITF.i_data_p <= 8'b0;
     `DRIV_ITF.io_miso_s <= 8'b0;
+    `DRIV_ITF.io_mosi_s <= 8'b0;
     `DRIV_ITF.SS <= 1'b0;
     R_counter_div = 0;
     cal = 12'b1;
     SCK_reg = 0;
 
-    //case master
+    //case
     `DRIV_ITF.io_mosi_s <= 1'b0;
+    `DRIV_ITF.io_miso_s <= 1'b0;
 
     wait (!i_spi.rst);
 
@@ -60,9 +62,9 @@ class driver;
             @(posedge i_spi.DR    IVER.clk);
             if (!`DRIV_ITF.SS) begin
               if (R_counter_div < cal) begin
-                counter++;
+                R_counter_div++;
               end else begin
-                counter = 0;
+                R_counter_div = 0;
                 `DRIV_ITF.SCK <= ~`DRIV_ITF.SCK;
               end
             end
