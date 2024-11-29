@@ -6,7 +6,7 @@ class driver;
   mailbox gen2driv;
   function new(virtual itf_spi_env i_spi, mailbox gen2driv);
     this.i_spi = i_spi;
-    this.gen2driv = gen2driv;
+    this.gen2driv = gen2driv; 
 
   endfunction
   // reset
@@ -30,19 +30,27 @@ class driver;
     //output
     @(posedge i_spi.DRIVER.clk);
     `DRIV_ITF.data_config <= trans.data_config;
-    repeat (10) @(i_spi.DRIVER.clk);
-    `DRIV_ITF.i_data_p <= trans.i_data_p;
-    `DRIV_ITF.trans_en <= 1'b1;
-    //@(negedge i_spi.SS)
-    for (int i = 0; i < 8; i++) begin
-      //  @(posedge i_spi.SCK)
-      //	  trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
-      @(negedge i_spi.SCK) `DRIV_ITF.io_miso_s <= trans.io_miso_s[7-i];
+    if (trans.data_config[28] == 1) begin
+      repeat (10) @(i_spi.DRIVER.clk);
+      `DRIV_ITF.i_data_p <= trans.i_data_p;
+      `DRIV_ITF.trans_en <= 1'b1;
+      //@(negedge i_spi.SS)
+      for (int i = 0; i < 8; i++) begin
+        //  @(posedge i_spi.SCK)
+        //	  trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
+        @(negedge i_spi.SCK) `DRIV_ITF.io_miso_s <= trans.io_miso_s[7-i];
+      end
+      trans.interupt_request = `DRIV_ITF.interupt_request;
+      repeat (10) @(posedge i_spi.DRIVER.clk);
+      `DRIV_ITF.trans_en <= 1'b0;
+      no_transaction++;
+    end else begin
+      repeat (10) @(i_spi.DRIVER.clk);
+      `DRIV_ITF.i_data_p <= trans.i_data_p;
+      `DRIV_ITF.SS <= 1'b0;
+
     end
-    trans.interupt_request = `DRIV_ITF.interupt_request;
-    repeat (10) @(posedge i_spi.DRIVER.clk);
-    `DRIV_ITF.trans_en <= 1'b0;
-    no_transaction++;
+
 
   endtask
   task main;
