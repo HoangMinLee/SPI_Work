@@ -41,7 +41,7 @@ class driver;
     for (int i = 0; i < 8; i++) begin
       //  @(posedge i_spi.SCK)
       //	  trans.o_data_s[7-i] = `DRIV_ITF.o_data_s;
-      @(negedge i_spi.SCK) `DRIV_ITF.io_miso_s<= trans.i_data_s[7-i];
+      @(negedge i_spi.SCK) `DRIV_ITF.io_miso_s<= trans.io_miso_s[7-i];
     end
     trans.interupt_request = `DRIV_ITF.interupt_request;
     repeat (10) @(posedge i_spi.DRIVER.clk);
