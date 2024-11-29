@@ -4,7 +4,7 @@ module spi_module (
     input [31:0] i_data_config,
     input i_trans_en,
     input [7:0] i_data,
-    output reg [7:0] o_data,
+    output [7:0] o_data,
     output o_interrupt,
     inout io_SCK,
     inout io_MOSI,
@@ -35,7 +35,7 @@ module spi_module (
     if (!i_sys_rst) begin
       R_counter_div <= 12'b0;
       cal <= 12'b0;
-      M_SCK <= R_SPI_CONTROL_1[3];
+      M_SCK <= 0;
     end
 		else if((R_SPI_CONTROL_1[4])&&(R_SPI_CONTROL_1[6]==1)&&(R_SPI_CONTROL_2[1]==0)) begin
       //MASTER - ENABLE SYS - INTERUP EN - CHECK INTERUP - CONDITION COUNTER
@@ -71,7 +71,6 @@ module spi_module (
       R_SPI_DATA_SHIFT <= 8'b0;
       R_SPI_DATA <= 8'b0;
       STATUS <= IDLE;
-      o_data <= 8'b0;
     end else if (STATUS == IDLE) begin  // should be <= instead of =
       R_SPI_CONTROL_1 <= i_data_config[31:24];
       R_SPI_CONTROL_2 <= i_data_config[23:16];
@@ -119,12 +118,9 @@ module spi_module (
       M_SS <= 1'b1;
     end
   end
+
   always @(posedge i_trans_en) begin
     if (STATUS == MASTER) begin
-
-      //       R_SPI_DATA = i_data;
-      //       R_SPI_DATA_SHIFT = R_SPI_DATA;					//!!!!
-      //        R_SPI_STATUS[7] = 1'b0;
       M_SS <= 1'b0;
     end
   end
@@ -139,7 +135,6 @@ module spi_module (
   //             R_SPI_STATUS[4] <= 1'b1;
   //         end
   //     end
-
   // end
 
   assign io_SS = ((STATUS == MASTER) && (R_SPI_CONTROL_1[1])) ? M_SS : 1'bz;
@@ -148,16 +143,18 @@ module spi_module (
   always @(negedge io_SS) begin
     if (STATUS == MASTER) begin
       counter_i <= 4'b0;
-      R_SPI_DATA_SHIFT <= i_data;  //!!!
+      R_SPI_DATA_SHIFT <= i_data;
       R_SPI_STATUS[7] <= 1'b0;
     end
   end
+
   always @(posedge io_SS) begin
     if (STATUS == MASTER) begin
-      o_data <= R_SPI_DATA_SHIFT;
+      R_SPI_DATA <= R_SPI_DATA_SHIFT;
       R_SPI_STATUS[7] <= 1'b1;
     end
   end
+
   always @(posedge M_SCK) begin
     if ((!R_SPI_CONTROL_2[0]) && (STATUS == MASTER) && (R_SPI_CONTROL_1[6])) begin  //checl SPC0
       if ((R_SPI_CONTROL_1[2])) begin  // CPHA
@@ -169,6 +166,7 @@ module spi_module (
       end
     end
   end
+
   always @(negedge M_SCK) begin
     if ((!R_SPI_CONTROL_2[0]) && (STATUS == MASTER) && (R_SPI_CONTROL_1[6])) begin  //checl SPC0
       if ((R_SPI_CONTROL_1[2]) && (!R_SPI_STATUS[7])) begin  // CPHA
@@ -188,7 +186,7 @@ module spi_module (
 
   assign o_interrupt = (R_SPI_CONTROL_1[7] && R_SPI_STATUS[4]) ? 1'b1 : 1'b0;
   assign io_MOSI = ((!R_SPI_STATUS[7]) && (STATUS == MASTER)) ? M_MOSI : 1'bz;
-
+  assign o_data = R_SPI_DATA;
 
   //==========================================================
   // 		SLAVE MODE
@@ -196,15 +194,17 @@ module spi_module (
   wire S_CLK;
   assign S_CLK = io_SCK;
   reg S_MISO;
+
   always @(negedge io_SS) begin
     if (STATUS == SLAVE) begin
-      R_SPI_DATA_SHIFT <= i_data;  //!!!
+      R_SPI_DATA_SHIFT <= i_data;
       R_SPI_STATUS[7]  <= 1'b0;
     end
   end
+
   always @(posedge io_SS) begin
     if (STATUS == SLAVE) begin
-      o_data <= R_SPI_DATA_SHIFT;
+      R_SPI_DATA <= R_SPI_DATA_SHIFT;
       R_SPI_STATUS[7] <= 1'b1;
     end
   end
@@ -215,6 +215,7 @@ module spi_module (
       S_MISO <= 1'b0;
     end
   end
+
   // SLAVE TRANS
   always @(posedge io_SCK) begin
 
@@ -225,6 +226,7 @@ module spi_module (
       end
     end
   end
+
   always @(negedge io_SCK) begin
     if ((!R_SPI_CONTROL_2[0]) && (STATUS == SLAVE) && (R_SPI_CONTROL_1[6])) begin  //checl SPC0
       if ((R_SPI_CONTROL_1[2]) && (!R_SPI_STATUS[7]) && (!io_SS)) begin  // CPHA
