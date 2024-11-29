@@ -90,7 +90,6 @@ class driver;
       begin
         forever driver();
       end
-
     join_any
   endtask
 endclass
