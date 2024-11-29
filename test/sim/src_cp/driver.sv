@@ -57,7 +57,7 @@ class driver;
       fork
         begin
           forever begin
-            @(posedge i_spi.DRIVER.clk);
+            @(posedge i_spi.DR    IVER.clk);
             if (!`DRIV_ITF.SS) begin
               if (R_counter_div < cal) begin
                 counter++;
