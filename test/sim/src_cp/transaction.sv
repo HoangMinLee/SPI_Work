@@ -7,7 +7,7 @@ class transaction;
   bit trans_en;
   bit interupt_request;
   bit [7:0] o_data_p;
-  bit [7:0] io_mosi_s;
+  randc bit [7:0] io_mosi_s;
   bit SCK;
   bit SS;
 
