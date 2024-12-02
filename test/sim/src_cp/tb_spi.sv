@@ -11,7 +11,7 @@ module tb_spi;
     clk = 1'b0;
     rst = 1'b1;
     #5 rst = 1'b0;
-    #5 rst = 1'b1;  //  C1      //C2      //Status//baud rate
+    #13 rst = 1'b1;  //  C1      //C2      //Status//baud rate
     //  i_spi.data_config_master <= 32'b11010110_00010000_10000000_00010001;
     //  i_spi.data_config_slave <= 32'b01000100_00000000_10000000_00010001;
     //  #4000 i_spi.data_config_master <= 32'b01010110_00010000_10000000_00110001;
@@ -23,8 +23,7 @@ module tb_spi;
       rst
   );
   test test (i_spi);
-
-
+  
   spi_module uut (
       .i_sys_clk(i_spi.clk),
       .i_sys_rst(i_spi.rst),

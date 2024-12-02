@@ -12,13 +12,13 @@ class driver;
   // reset
   task reset;
     wait (i_spi.rst);
-    `DRIV_ITF.i_data_p <= 8'b0;
+    `DRIV_ITF.i_data_p <= 8'bz;
     `DRIV_ITF.io_miso_s <= 8'bz;
-    `DRIV_ITF.SS <= 1'b0;
-   
-    //case master
+    `DRIV_ITF.io_mosi_s <= 8'b0;
+    `DRIV_ITF.trans_en <= 1'b0;
+    //case 
     `DRIV_ITF.io_mosi_s <= 1'b0;
-
+    `DRIV_ITF.io_mosi_s <= 8'b0;
     wait (!i_spi.rst);
 
   endtask
@@ -44,27 +44,28 @@ class driver;
       repeat (10) @(posedge i_spi.DRIVER.clk);
       `DRIV_ITF.trans_en <= 1'b0;
       no_transaction++;
-    end
-    else begin
+    end 
+    else begin  //slave
+      `DRIV_ITF.SS <= 1'b1;
       repeat (10) @(i_spi.DRIVER.clk);
       `DRIV_ITF.i_data_p <= trans.i_data_p;
       `DRIV_ITF.SS <= 1'b0;
       for (int i = 0; i < 8; i++) begin
-        `DRIV_ITF.SCK <= 1'b0; 
-        @(posedge i_spi.DRIVER.clk); 
-        `DRIV_ITF.io_mosi_s <= trans.i_data_p[7 - i];
+        `DRIV_ITF.SCK <= 1'b0;
+        @(posedge i_spi.DRIVER.clk);
+        @(posedge i_spi.DRIVER.clk);
+        // `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];
         `DRIV_ITF.SCK <= 1'b1;
-        @(posedge i_spi.DRIVER.clk); 
-      end
+        @(posedge i_spi.DRIVER.clk);
+        @(posedge i_spi.DRIVER.clk);
+        `DRIV_ITF.io_mosi_s <= trans.io_mosi_s[7-i];
 
-      `DRIV_ITF.SS <= 1'b1; 
-      `DRIV_ITF.SCK <= 1'b0; 
+      end
+      `DRIV_ITF.SCK <= 1'b0;
+      `DRIV_ITF.SS  <= 1'b1;
       no_transaction++;
 
     end
-
-
-
 
   endtask
   task main;
