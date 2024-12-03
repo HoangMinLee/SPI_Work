@@ -14,7 +14,7 @@ class driver;
     wait (i_spi.rst);
     `DRIV_ITF.i_data_p <= 8'bz;
     `DRIV_ITF.io_miso_s <= 8'bz;
-    `DRIV_ITF.io_mosi_s <= 8'b0;
+    `DRIV_ITF.io_mosi_s <= 8'bz;
     `DRIV_ITF.trans_en <= 1'b0;
     //case 
     `DRIV_ITF.io_mosi_s <= 1'b0;
