@@ -10,7 +10,7 @@ class monitor;
 
   task main;
     forever begin
-      transaction trans;
+      transaction trans;  
       trans = new();
       if (trans.data_config[28] == 1) begin
         @(posedge i_spi.clk);

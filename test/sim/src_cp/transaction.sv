@@ -25,9 +25,6 @@ class transaction;
     trans.o_data_p = this.o_data_p;
     trans.io_mosi_s = this.io_mosi_s;
     return trans;
-
-
-
   endfunction
 
 
