@@ -13,7 +13,7 @@ class enviroment;
 
   mailbox gen2driv;
   mailbox mon2scb;
-  //mailbox gen2score;
+
 
   virtual itf_spi_env i_spi;
   event gen_ended;
