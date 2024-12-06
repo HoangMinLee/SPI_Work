@@ -16,7 +16,7 @@ class generator;
     repeat (repeat_count) begin
       if (!trans.randomize()) begin
         $fatal("trans randomize is failed");
-      end
+      end 
       tr = trans.copy_data();
       gen2driv.put(tr);
    //   gen2mon.put(tr); //dev

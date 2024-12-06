@@ -128,25 +128,11 @@ end
 always @(posedge i_trans_en) begin
     if(STATUS == MASTER) begin
         counter_i = 4'b0;
-//       R_SPI_DATA = i_data;
-//       R_SPI_DATA_SHIFT = R_SPI_DATA;					//!!!!
-//        R_SPI_STATUS[7] = 1'b0;
         M_SS = 1'b0;
     end
 end
 
 
-// DETECTED MODE - DON'T RUN
-// always @(posedge SCK) begin
-//     if((R_SPI_CONTROL_1[6])&&(STATUS == MASTER)) begin
-//         if(R_SPI_CONTROL_2[4]&&(!R_SPI_CONTROL_1[1]))begin //check master detecting erro master
-//             R_SPI_CONTROL_1[4] <= 1'b0;
-//             STATUS <= SLAVE;
-//             R_SPI_STATUS[4] <= 1'b1;
-//         end
-//     end
-
-// end
 
 assign io_SS = ((STATUS==MASTER)&&(R_SPI_CONTROL_1[1]))? M_SS: 1'bz;
 
@@ -154,7 +140,7 @@ assign io_SS = ((STATUS==MASTER)&&(R_SPI_CONTROL_1[1]))? M_SS: 1'bz;
 always @(negedge io_SS) begin
     if(STATUS == MASTER) begin
     R_SPI_DATA = i_data;
-    R_SPI_DATA_SHIFT = R_SPI_DATA;						//!!!
+    R_SPI_DATA_SHIFT = R_SPI_DATA;						
     R_SPI_STATUS[7] = 1'b0;
     end
 end
@@ -214,7 +200,7 @@ always @(posedge io_SS) begin
     if(STATUS ==SLAVE) begin
         o_data = R_SPI_DATA_SHIFT;
         R_SPI_STATUS[7] = 1'b1;
-    end
+    end 
 end
  
 
@@ -227,7 +213,7 @@ end
 always @(posedge io_SCK) begin
     
     if((!R_SPI_CONTROL_2[0])&&(STATUS == SLAVE)&&(R_SPI_CONTROL_1[6])) begin //check SPC0
-        if((R_SPI_CONTROL_1[2])&&(!R_SPI_STATUS[7])&&(!io_SS)) begin // CPHA
+        if((R_SPI_CONTROL_1[2])&&(!R_SPI_STATUS[7])) begin // CPHA
             if(R_SPI_CONTROL_1[0] == 1'b1)
                 S_MISO = R_SPI_DATA_SHIFT[7];
             else
@@ -237,7 +223,7 @@ always @(posedge io_SCK) begin
 end
 always @(negedge io_SCK) begin
     if((!R_SPI_CONTROL_2[0])&&(STATUS == SLAVE)&&(R_SPI_CONTROL_1[6])) begin //checl SPC0
-        if((R_SPI_CONTROL_1[2])&&(!R_SPI_STATUS[7])&&(!io_SS)) begin // CPHA
+        if((R_SPI_CONTROL_1[2])&&(!R_SPI_STATUS[7])) begin // CPHA
             if(R_SPI_CONTROL_1[0]== 1'b1)
                 R_SPI_DATA_SHIFT = {R_SPI_DATA_SHIFT[6:0], io_MOSI};
             else

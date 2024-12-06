@@ -12,7 +12,7 @@ class transaction;
   bit SS;
 
   function void display(string tag = "");
-    $display("time: %0t [%s] i_data_m: %h, io_miso_s: %h, o_data_m: %h, io_mosi_s: %h", $time, tag,
+    $display("time: %0t [%s] i_data_p: %h, io_miso_s: %h, o_data_p  : %h, io_mosi_s: %h", $time, tag,
              i_data_p, io_miso_s, o_data_p, io_mosi_s);
 
   endfunction

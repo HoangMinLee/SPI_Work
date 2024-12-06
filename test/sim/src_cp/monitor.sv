@@ -3,29 +3,68 @@ class monitor;
   virtual itf_spi_env i_spi;
 
   mailbox mon2scb;
+  // mailbox gen2driv;
+  //mailbox gen2mon;
+
   function new(virtual itf_spi_env i_spi, mailbox mon2scb);
     this.i_spi   = i_spi;
     this.mon2scb = mon2scb;
+    //this.gen2mon = gen2mon;
   endfunction
 
   task main;
     forever begin
       transaction trans;
       trans = new();
-      @(posedge i_spi.clk);
-      wait (!i_spi.SS);
-      trans.i_data_p = i_spi.i_data_p;
-      //trans.io_miso_s = i_spi.io_miso_s;
-      for (int i = 0; i < 8; i++) begin
-        @(posedge i_spi.SCK) trans.io_mosi_s[i] = i_spi.io_mosi_s;
-        @(negedge i_spi.SCK) trans.io_miso_s[i] = i_spi.io_miso_s;
+      trans.data_config = i_spi.data_config;
+      //gen2mon.get(trans);
+      if (trans.data_config[28] == 1) begin
+        wait (!i_spi.SS);
+        @(posedge i_spi.clk);
+        wait (!i_spi.SS);
+        trans.i_data_p = i_spi.i_data_p;
+        if (trans.data_config[24==0]) begin
+          for (int i = 0; i < 8; i++) begin
+            @(posedge i_spi.SCK) trans.io_mosi_s[i] = i_spi.io_mosi_s;
+            @(negedge i_spi.SCK) trans.io_miso_s[i] = i_spi.io_miso_s;
+          end
+        end else begin
+          for (int i = 0; i < 8; i++) begin
+            @(posedge i_spi.SCK) trans.io_mosi_s[7-i] = i_spi.io_mosi_s;
+            @(negedge i_spi.SCK) trans.io_miso_s[7-i] = i_spi.io_miso_s;
+          end
+        end
+        wait (i_spi.SS);
+        @(posedge i_spi.clk);
+        trans.o_data_p = i_spi.o_data_p;
+        trans.data_config = i_spi.data_config;
+        @(posedge i_spi.clk);
+        mon2scb.put(trans);
+      end else begin
+        @(posedge i_spi.clk);
+        wait (!i_spi.SS);
+        trans.i_data_p = i_spi.i_data_p;
+        if (trans.data_config[24] == 0) begin
+          for (int i = 0; i < 8; i++) begin
+            @(posedge i_spi.SCK) trans.io_miso_s[i] = i_spi.io_miso_s;
+            @(negedge i_spi.SCK) trans.io_mosi_s[i] = i_spi.io_mosi_s;
+          end
+        end else begin
+          for (int i = 0; i < 8; i++) begin
+            @(posedge i_spi.SCK) trans.io_miso_s[7-i] = i_spi.io_miso_s;
+            @(negedge i_spi.SCK) trans.io_mosi_s[7-i] = i_spi.io_mosi_s;
+          end
+        end
+        wait (i_spi.SS);
+        @(posedge i_spi.clk);
+        trans.o_data_p = i_spi.o_data_p;
+        trans.data_config = i_spi.data_config;
+        @(posedge i_spi.clk);
+        mon2scb.put(trans);
       end
-      wait (i_spi.SS);
-      @(posedge i_spi.clk);
-      trans.o_data_p = i_spi.o_data_p;
-      //trans.io_mosi_s = i_spi.io_mosi_s;
-      @(posedge i_spi.clk);
-      mon2scb.put(trans);
+
+
+
 
     end
 
@@ -33,4 +72,3 @@ class monitor;
   endtask
 
 endclass
-
